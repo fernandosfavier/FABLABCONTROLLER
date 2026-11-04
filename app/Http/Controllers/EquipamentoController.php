@@ -4,178 +4,113 @@ namespace App\Http\Controllers;
 
 use App\Models\Equipamento;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class EquipamentoController extends Controller
 {
-    public function cadastro_html()
-    {
-        return view('cadastro_equipamento');
-    }
-
     public function salvar_equipamento(Request $request)
     {
-        $request->validate([
+        $dados = $request->validate([
             'patrimonio' => 'required|string|max:255|unique:equipamento,patrimonio',
             'nome' => 'required|string|max:255',
             'tipo' => 'required|string|max:255',
             'modelo' => 'nullable|string|max:255',
-            'status' => 'required|string|max:255',
-            'observacao' => 'nullable|string',
+            'status' => 'sometimes|required|string|max:255',
+            'observacao' => 'nullable|string'
         ]);
 
-        try {
-            $equipamento = new Equipamento();
+        $equipamento = Equipamento::create($dados);
 
-            $equipamento->patrimonio = $request->patrimonio;
-            $equipamento->nome = $request->nome;
-            $equipamento->tipo = $request->tipo;
-            $equipamento->modelo = $request->modelo;
-            $equipamento->status = $request->status;
-            $equipamento->observacao = $request->observacao;
-
-            $equipamento->save();
-
-            return response()->json([
-                'mensagem' => 'Equipamento cadastrado com sucesso!',
-                'error' => 'n',
-            ], 200);
-
-        } catch (\Throwable $th) {
-
-            return response()->json([
-                'mensagem' => 'Erro ao cadastrar equipamento',
-                'error' => 's',
-                'msg_erro' => $th->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'mensagem' => 'Equipamento cadastrado com sucesso.',
+            'equipamento' => $equipamento
+        ], 201);
     }
 
     public function ver_equipamento(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer',
+            'id' => 'required|integer'
         ]);
 
-        $equipamento = Equipamento::find($request->id);
-
-        if ($equipamento) {
-
-            return response()->json([
-                'mensagem' => 'Equipamento encontrado com sucesso!',
-                'error' => 'n',
-                'equipamento' => $equipamento,
-            ], 200);
-
-        } else {
-
-            return response()->json([
-                'mensagem' => 'Equipamento não encontrado',
-                'error' => 's',
-            ], 200);
-        }
+        return response()->json(
+            Equipamento::with('itensEmprestimo.emprestimo')
+                ->findOrFail($request->id)
+        );
     }
 
     public function listar_equipamentos()
     {
-        $equipamentos = Equipamento::all();
-
-        return response()->json([
-            'equipamentos' => $equipamentos,
-        ], 200);
+        return response()->json(
+            Equipamento::with('itensEmprestimo')
+                ->orderBy('id', 'desc')
+                ->get()
+        );
     }
 
     public function listar_equipamentos_simples()
     {
-        $equipamentos = Equipamento::select(
-            'patrimonio',
-            'nome',
-            'tipo',
-            'modelo',
-            'status'
-        )->get();
-
-        return response()->json([
-            'equipamentos' => $equipamentos,
-        ], 200);
+        return response()->json(
+            Equipamento::select(
+                'id',
+                'patrimonio',
+                'nome',
+                'tipo',
+                'status'
+            )->orderBy('nome')->get()
+        );
     }
 
     public function alterar_equipamento(Request $request)
     {
-        try {
+        $request->validate([
+            'id' => 'required|integer|exists:equipamento,id'
+        ]);
 
-            $equipamento = Equipamento::find($request->id);
+        $equipamento = Equipamento::findOrFail($request->id);
 
-            if (!$equipamento) {
-                return response()->json([
-                    'mensagem' => 'Equipamento não encontrado',
-                    'error' => 's',
-                ], 200);
-            }
+        $dados = $request->validate([
+            'patrimonio' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('equipamento', 'patrimonio')
+                    ->ignore($equipamento->id)
+            ],
+            'nome' => 'sometimes|required|string|max:255',
+            'tipo' => 'sometimes|required|string|max:255',
+            'modelo' => 'sometimes|nullable|string|max:255',
+            'status' => 'sometimes|required|string|max:255',
+            'observacao' => 'sometimes|nullable|string'
+        ]);
 
-            if ($equipamento->patrimonio != $request->patrimonio) {
+        $equipamento->update($dados);
 
-                $equipamento_patrimonio_igual = Equipamento::where(
-                    'patrimonio',
-                    $request->patrimonio
-                )->first();
-
-                if ($equipamento_patrimonio_igual) {
-
-                    return response()->json([
-                        'mensagem' => 'Patrimônio já cadastrado para outro equipamento',
-                        'error' => 's',
-                    ], 200);
-                }
-            }
-
-            $equipamento->patrimonio = $request->patrimonio;
-            $equipamento->nome = $request->nome;
-            $equipamento->tipo = $request->tipo;
-            $equipamento->modelo = $request->modelo;
-            $equipamento->status = $request->status;
-            $equipamento->observacao = $request->observacao;
-
-            $equipamento->save();
-
-            return response()->json([
-                'mensagem' => 'Equipamento alterado com sucesso!',
-                'error' => 'n',
-            ], 200);
-
-        } catch (\Throwable $th) {
-
-            return response()->json([
-                'mensagem' => 'Erro ao alterar equipamento',
-                'error' => 's',
-                'msg_erro' => $th->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'mensagem' => 'Equipamento atualizado com sucesso.',
+            'equipamento' => $equipamento->fresh()
+        ]);
     }
 
     public function deletar_equipamento(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer|exists:equipamento,id',
+            'id' => 'required|integer|exists:equipamento,id'
         ]);
 
-        try {
+        $equipamento = Equipamento::findOrFail($request->id);
 
-            $equipamento = Equipamento::find($request->id);
-
-            $equipamento->delete();
-
+        if ($equipamento->itensEmprestimo()->exists()) {
             return response()->json([
-                'mensagem' => 'Equipamento deletado com sucesso!',
-                'error' => 'n',
-            ], 200);
-
-        } catch (\Throwable $th) {
-
-            return response()->json([
-                'mensagem' => 'Erro ao deletar equipamento',
-                'error' => 's',
-                'msg_erro' => $th->getMessage(),
-            ], 500);
+                'mensagem' => 'Não é possível excluir um equipamento que possui histórico de empréstimos.'
+            ], 422);
         }
+
+        $equipamento->delete();
+
+        return response()->json([
+            'mensagem' => 'Equipamento excluído com sucesso.'
+        ]);
     }
 }

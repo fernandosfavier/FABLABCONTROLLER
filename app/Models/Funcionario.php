@@ -15,18 +15,20 @@ class Funcionario extends Model
         'senha',
         'tipo_usuario',
         'status',
-        'data_nascimento',
+        'data_nascimento'
+    ];
+
+    protected $hidden = [
+        'senha'
     ];
 
     protected $casts = [
         'status' => 'boolean',
-        'data_nascimento' => 'date',
+        'data_nascimento' => 'date'
     ];
 
     public function emprestimos()
     {
         return $this->hasMany(Emprestimo::class, 'funcionario_id');
     }
-
-    
 }

@@ -9,166 +9,122 @@ class EmprestimoController extends Controller
 {
     public function salvar_emprestimo(Request $request)
     {
-        $request->validate([
+        $dados = $request->validate([
             'funcionario_id' => 'required|integer|exists:funcionario,id',
             'sala_id' => 'required|integer|exists:sala,id',
             'data_retirada' => 'required|date',
-            'data_prevista_devolucao' => 'nullable|date',
-            'data_devolucao' => 'nullable|date',
-            'status' => 'required|string|max:255',
-            'observacao' => 'nullable|string',
+            'data_prevista_devolucao' => 'nullable|date|after_or_equal:data_retirada',
+            'data_devolucao' => 'nullable|date|after_or_equal:data_retirada',
+            'status' => 'sometimes|required|in:Aberto,Fechado,Cancelado',
+            'observacao' => 'nullable|string'
         ]);
 
-        try {
+        $dados['status'] = $dados['status'] ?? 'Aberto';
 
-            $emprestimo = new Emprestimo();
+        $emprestimo = Emprestimo::create($dados);
 
-            $emprestimo->funcionario_id = $request->funcionario_id;
-            $emprestimo->sala_id = $request->sala_id;
-            $emprestimo->data_retirada = $request->data_retirada;
-            $emprestimo->data_prevista_devolucao = $request->data_prevista_devolucao;
-            $emprestimo->data_devolucao = $request->data_devolucao;
-            $emprestimo->status = $request->status;
-            $emprestimo->observacao = $request->observacao;
-
-            $emprestimo->save();
-
-            return response()->json([
-                'mensagem' => 'Empréstimo cadastrado com sucesso!',
-                'error' => 'n',
-            ], 200);
-
-        } catch (\Throwable $th) {
-
-            return response()->json([
-                'mensagem' => 'Erro ao cadastrar empréstimo',
-                'error' => 's',
-                'msg_erro' => $th->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'mensagem' => 'Empréstimo cadastrado com sucesso.',
+            'emprestimo' => $emprestimo->load([
+                'funcionario',
+                'sala',
+                'itens.equipamento'
+            ])
+        ], 201);
     }
 
     public function ver_emprestimo(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer',
+            'id' => 'required|integer'
         ]);
 
-        $emprestimo = Emprestimo::with([
-            'funcionario',
-            'sala',
-            'itens.equipamento'
-        ])->find($request->id);
-
-        if ($emprestimo) {
-
-            return response()->json([
-                'mensagem' => 'Empréstimo encontrado com sucesso!',
-                'error' => 'n',
-                'emprestimo' => $emprestimo,
-            ], 200);
-
-        } else {
-
-            return response()->json([
-                'mensagem' => 'Empréstimo não encontrado',
-                'error' => 's',
-            ], 200);
-        }
+        return response()->json(
+            Emprestimo::with([
+                'funcionario',
+                'sala',
+                'itens.equipamento'
+            ])->findOrFail($request->id)
+        );
     }
 
     public function listar_emprestimos()
     {
-        $emprestimos = Emprestimo::with([
-            'funcionario',
-            'sala'
-        ])->get();
-
-        return response()->json([
-            'emprestimos' => $emprestimos,
-        ], 200);
+        return response()->json(
+            Emprestimo::with([
+                'funcionario',
+                'sala',
+                'itens.equipamento'
+            ])->orderBy('id', 'desc')->get()
+        );
     }
 
     public function listar_emprestimos_simples()
     {
-        $emprestimos = Emprestimo::select(
-            'id',
-            'funcionario_id',
-            'sala_id',
-            'data_retirada',
-            'data_prevista_devolucao',
-            'data_devolucao',
-            'status'
-        )->get();
-
-        return response()->json([
-            'emprestimos' => $emprestimos,
-        ], 200);
+        return response()->json(
+            Emprestimo::select(
+                'id',
+                'funcionario_id',
+                'sala_id',
+                'data_retirada',
+                'data_prevista_devolucao',
+                'data_devolucao',
+                'status'
+            )->with([
+                'funcionario:id,nome,nif',
+                'sala:id,nome'
+            ])->orderBy('id', 'desc')->get()
+        );
     }
 
     public function alterar_emprestimo(Request $request)
     {
-        try {
+        $request->validate([
+            'id' => 'required|integer|exists:emprestimo,id'
+        ]);
 
-            $emprestimo = Emprestimo::find($request->id);
+        $emprestimo = Emprestimo::findOrFail($request->id);
 
-            if (!$emprestimo) {
+        $dados = $request->validate([
+            'funcionario_id' => 'sometimes|required|integer|exists:funcionario,id',
+            'sala_id' => 'sometimes|required|integer|exists:sala,id',
+            'data_retirada' => 'sometimes|required|date',
+            'data_prevista_devolucao' => 'sometimes|nullable|date',
+            'data_devolucao' => 'sometimes|nullable|date',
+            'status' => 'sometimes|required|in:Aberto,Fechado,Cancelado',
+            'observacao' => 'sometimes|nullable|string'
+        ]);
 
-                return response()->json([
-                    'mensagem' => 'Empréstimo não encontrado',
-                    'error' => 's',
-                ], 200);
-            }
+        $emprestimo->update($dados);
 
-            $emprestimo->funcionario_id = $request->funcionario_id;
-            $emprestimo->sala_id = $request->sala_id;
-            $emprestimo->data_retirada = $request->data_retirada;
-            $emprestimo->data_prevista_devolucao = $request->data_prevista_devolucao;
-            $emprestimo->data_devolucao = $request->data_devolucao;
-            $emprestimo->status = $request->status;
-            $emprestimo->observacao = $request->observacao;
-
-            $emprestimo->save();
-
-            return response()->json([
-                'mensagem' => 'Empréstimo alterado com sucesso!',
-                'error' => 'n',
-            ], 200);
-
-        } catch (\Throwable $th) {
-
-            return response()->json([
-                'mensagem' => 'Erro ao alterar empréstimo',
-                'error' => 's',
-                'msg_erro' => $th->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'mensagem' => 'Empréstimo atualizado com sucesso.',
+            'emprestimo' => $emprestimo->fresh([
+                'funcionario',
+                'sala',
+                'itens.equipamento'
+            ])
+        ]);
     }
 
     public function deletar_emprestimo(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer|exists:emprestimo,id',
+            'id' => 'required|integer|exists:emprestimo,id'
         ]);
 
-        try {
+        $emprestimo = Emprestimo::with('itens')->findOrFail($request->id);
 
-            $emprestimo = Emprestimo::find($request->id);
-
-            $emprestimo->delete();
-
+        if ($emprestimo->itens()->exists()) {
             return response()->json([
-                'mensagem' => 'Empréstimo deletado com sucesso!',
-                'error' => 'n',
-            ], 200);
-
-        } catch (\Throwable $th) {
-
-            return response()->json([
-                'mensagem' => 'Erro ao deletar empréstimo',
-                'error' => 's',
-                'msg_erro' => $th->getMessage(),
-            ], 500);
+                'mensagem' => 'Não é possível excluir um empréstimo com itens vinculados. Preserve o histórico ou implemente um cancelamento.'
+            ], 422);
         }
+
+        $emprestimo->delete();
+
+        return response()->json([
+            'mensagem' => 'Empréstimo excluído com sucesso.'
+        ]);
     }
 }

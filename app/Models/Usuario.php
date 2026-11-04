@@ -18,6 +18,10 @@ class Usuario extends Model
         'data_nascimento'
     ];
 
+    protected $hidden = [
+        'senha'
+    ];
+
     protected $casts = [
         'status' => 'boolean',
         'data_nascimento' => 'date'
