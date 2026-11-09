@@ -11,6 +11,7 @@ use App\Http\Controllers\ItemEmprestimoController;
 use App\Http\Middleware\LoginMiddleware;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\LogoutMiddleware;
+use App\Http\Controllers\LoginController;
 
 Route::post('/salvar_usuario', [UsuarioController::class, 'salvar_usuario']);
 Route::get('/ver_usuario', [UsuarioController::class, 'ver_usuario']);
@@ -54,6 +55,7 @@ Route::get('/listar_itens_emprestimo_simples', [ItemEmprestimoController::class,
 Route::put('/alterar_item_emprestimo', [ItemEmprestimoController::class, 'alterar_item_emprestimo']);
 Route::delete('/deletar_item_emprestimo', [ItemEmprestimoController::class, 'deletar_item_emprestimo']);
 
+Route::post('/login', [UsuarioController::class, 'login']);
 Route::post('/logout', [LogoutController::class, 'logout'])->middleware('logout');
 Route::post('/teste_admin', function () {
     return response()->json(['message' => 'Você é um administrador!'], 200);

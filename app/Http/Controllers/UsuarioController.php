@@ -3,12 +3,46 @@
 namespace App\Http\Controllers;
 
 use App\Models\Usuario;
+use App\Models\UsuarioToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class UsuarioController extends Controller
 {
+    public function login(Request $request)
+    {
+        $dados = $request->validate([
+            'nif' => 'required|string',
+            'senha' => 'required|string'
+        ]);
+
+        $usuario = Usuario::where('nif', $dados['nif'])->first();
+
+        if (!$usuario || !Hash::check($dados['senha'], $usuario->senha)) {
+            return response()->json([
+                'mensagem' => 'NIF ou senha incorretos.',
+                'erro' => 's'
+            ], 401);
+        }
+
+        $token = UsuarioToken::create([
+            'usuario_id' => $usuario->id,
+            'token' => Str::random(60),
+            'valido_ate' => Carbon::now()->addDay()
+        ]);
+
+        return response()->json([
+            'mensagem' => 'Login realizado com sucesso.',
+            'usuario_id' => $usuario->id,
+            'nome' => $usuario->nome,
+            'token' => $token->token,
+            'valido_ate' => $token->valido_ate
+        ], 200);
+    }
+
     public function salvar_usuario(Request $request)
     {
         $dados = $request->validate([

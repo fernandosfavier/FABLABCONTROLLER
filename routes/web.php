@@ -1,11 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LoginController;
 
-
-Route::get('/login', function () {
-    return view('login');
-})->name('login');
+Route::get('/loginteste', [LoginController::class, 'mostrarloginteste'] )->name('loginteste');
 
 Route::get('/agendamento', function () {
     return view('agendamento');
