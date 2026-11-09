@@ -22,6 +22,11 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.erro == 'n') {
                     alert(response.token);
+                    $.cookie('token', response.token, { path: '/' });
+                    $.cookie('usuario', response.usuario, { path: '/' });
+                    setTimeout(function() {
+                        window.location.href = '/agendamento';
+                    }, 3000);
                 } else {
                     Swal.fire({
                         icon: 'error',
