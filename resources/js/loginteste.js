@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    
+
     $('#entrar').click(function() {
 
         if ($('#email').val() === '' || $('#senha').val() === '') {
@@ -10,7 +10,35 @@ $(document).ready(function() {
             });
 
             return;
-        }   
-        
+        }
+
+        $.ajax({
+            url: '../api/login',
+            method: 'POST',
+            data: {
+                email: $('#email').val(),
+                password: $('#senha').val()
+            },
+            success: function(response) {
+                if (response.erro == 'n') {
+                    alert(response.token);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: response.mensagem,
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: 'Não foi possível realizar o login.'
+                });
+            }
+        });
+
     });
+
 });

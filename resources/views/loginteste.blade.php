@@ -6,14 +6,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Login</title>
 
-    @vite(['resources/css/app.css', 'resources/js/loginteste.js'])
+  
 
 </head>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://jquery.com" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+  @vite(['resources/css/app.css', 'resources/js/loginteste.js'])
 <body>
     <div class="container">
         <div class="row justify-content-center">
@@ -31,7 +31,7 @@
                                 <label for="password">Informe sua senha</label>
                                 <input type="password" class="form-control form-control-sm" id="password" placeholder="Senha">
                             </div>
-                            <button type="submit" class="btn btn-primary">Entrar</button>
+                            <button type="button" class="btn btn-primary" id="entrar">Entrar</button>
                     </div>
                 </div>
             </div>
