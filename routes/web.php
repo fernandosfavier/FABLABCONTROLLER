@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\HomeController;
+use App\Http\Middleware\LogadoWebMiddleware;
+use App\Http\Middleware\LogadoAdminMiddleware;
 
 Route::get('/loginteste', [LoginController::class, 'mostrarloginteste'] )->name('loginteste');
 
@@ -32,3 +35,7 @@ Route::get('/equipamento/cadastro', function () {
 Route::get('/equipamento/detalhe', function () {
     return view('detalhe_equipamento');
 })->name('equipamento.detalhe');
+
+Route::get('/home', [HomeController::class, 'mostrarHome'])->middleware(LogadoWebMiddleware::class)->name('home');
+Route::get('/login',[LoginController::class, 'mostrarloginteste'])->name('login');
+Route::get('/painel',[LoginController::class, 'mostraradmin'])->middleware(LogadoAdminMiddleware::class)->name('admin');

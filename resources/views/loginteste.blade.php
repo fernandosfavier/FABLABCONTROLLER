@@ -28,8 +28,8 @@
                                 <input type="email" class="form-control form-control-sm" id="email" placeholder="Email">
                             </div>
                             <div class="form-group">
-                                <label for="password">Informe sua senha</label>
-                                <input type="password" class="form-control form-control-sm" id="password" placeholder="Senha">
+                                <label for="senha   ">Informe sua senha</label>
+                                <input type="password" class="form-control form-control-sm" id="senha" placeholder="Senha">
                             </div>
                             <button type="button" class="btn btn-primary" id="entrar">Entrar</button>
                     </div>

@@ -14,10 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias([
-            'logout' => LogoutMiddleware::class,
-            'admin' => AdminMiddleware::class,
-        ]);
+       
+            $middleware->encryptCookies(except: [
+                'usuario_id',
+                'token'
+            ]);
+        
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

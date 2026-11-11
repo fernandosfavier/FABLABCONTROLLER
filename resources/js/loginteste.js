@@ -17,15 +17,15 @@ $(document).ready(function() {
             method: 'POST',
             data: {
                 email: $('#email').val(),
-                password: $('#senha').val()
+                senha: $('#senha').val()
             },
             success: function(response) {
                 if (response.erro == 'n') {
-                    alert(response.token);
-                    $.cookie('token', response.token, { path: '/' });
-                    $.cookie('usuario', response.usuario, { path: '/' });
+                    console.log(response);
+                    $.cookie('token', response.token);
+                    $.cookie('usuario_id', response.usuario);
                     setTimeout(function() {
-                        window.location.href = '/agendamento';
+                        window.location.href = '/home';
                     }, 3000);
                 } else {
                     Swal.fire({
