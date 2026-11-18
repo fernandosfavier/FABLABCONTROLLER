@@ -1,33 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-<!DOCTYPE html>
-<html lang="pt-br">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Login</title>
-
-  
-
+    <title>FABLABCONTROLLER</title>
 </head>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-  @vite(['resources/css/app.css', 'resources/js/loginteste.js'])
+
 <body>
-    <div class="container mt-5">
-        <h3 class="text-center">Bem-vindo, {{ $usuario->nome }}</h3>
-        @if (\'$admin == 'S')
-            button type="button" class="btn btn-primary" id="admin">Acessar Painel Admin</button>
-            a href="{{ route('login') }}" class="btn btn-danger">Painel Admin</a>
-        @else
-            <p class="text-center">Você não tem acesso ao painel de administração.</p>
-    </div>
+
+    <h1>FABLABCONTROLLER</h1>
+
+    <h2>Bem-vindo ao sistema!</h2>
+
+    <p>
+        Olá, {{ $usuario->nome }}!
+    </p>
+
+    <p>
+        Tipo de usuário: {{ $usuario->tipo_usuario }}
+    </p>
+
+    <h3>Funcionalidades do sistema</h3>
+
+    <ul>
+        <li>Consultar equipamentos</li>
+        <li>Consultar agendamentos</li>
+        <li>Visualizar informações do sistema</li>
+    </ul>
+
+    @if($usuario->tipo_usuario === 'Admin')
+
+        <h3>Painel Administrativo</h3>
+
+        <p>
+            Você possui acesso às funcionalidades administrativas.
+        </p>
+
+        <a href="{{ route('painel') }}">
+            Acessar painel administrativo
+        </a>
+
+        <br>
+
+        <a href="{{ route('cadastro_equipamento') }}">
+            Cadastrar equipamentos
+        </a>
+
+    @else
+
+        <h3>Painel do Usuário</h3>
+
+        <p>
+            Você possui acesso às funcionalidades disponíveis para usuários comuns.
+        </p>
+
+        <a href="{{ route('agendamento') }}">
+            Acessar agendamentos
+        </a>
+
+        <br>
+
+        <a href="{{ route('equipamento') }}">
+            Consultar equipamentos
+        </a>
+
+    @endif
+
 </body>
+
 </html>

@@ -6,6 +6,7 @@ use App\Models\Funcionario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Models\Usuario;
 
 class FuncionarioController extends Controller
 {
@@ -115,5 +116,13 @@ class FuncionarioController extends Controller
         return response()->json([
             'mensagem' => 'Funcionário excluído com sucesso.'
         ]);
+    }
+
+    public function funcionario_teste(Request $request)
+    {
+        $usuarios = Usuario::all();
+        return view('funcionario_teste')
+            ->with('usuarios', $usuarios);
+
     }
 }

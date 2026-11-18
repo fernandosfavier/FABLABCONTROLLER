@@ -1,3 +1,4 @@
+
 $(document).ready(function() {
 
     $('#entrar').click(function() {
@@ -6,44 +7,57 @@ $(document).ready(function() {
             Swal.fire({
                 icon: 'error',
                 title: 'Erro',
-                text: 'Por favor, preencha todos os campos.',
+                text: 'Por favor, preencha todos os campos.'
             });
 
             return;
         }
 
         $.ajax({
-            url: '../api/login',
+            url: '/api/login',
             method: 'POST',
             data: {
                 email: $('#email').val(),
                 senha: $('#senha').val()
             },
+
             success: function(response) {
+
                 if (response.erro == 'n') {
-                    console.log(response);
-                    $.cookie('token', response.token);
-                    $.cookie('usuario_id', response.usuario);
-                    setTimeout(function() {
-                        window.location.href = '/home';
-                    }, 3000);
+
+                    $.cookie('token', response.token, {
+                        path: '/',
+                        expires: 7
+                    });
+
+                    $.cookie('usuario_id', response.usuario_id, {
+                        path: '/',
+                        expires: 7
+                    });
+
+                    setTimeout(function(){
+                         window.location.href = '/home';
+                    },3000);
+
+                   
+
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Erro',
-                        text: response.mensagem,
+                        text: response.message
                     });
                 }
             },
-            error: function() {
+
+            error: function(xhr) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Erro',
-                    text: 'Não foi possível realizar o login.'
+                    text: xhr.responseJSON?.message || 'Não foi possível realizar o login.'
                 });
             }
         });
-
     });
 
 });

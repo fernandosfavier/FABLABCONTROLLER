@@ -12,7 +12,7 @@ class UsuarioController extends Controller
 {
     public function usuario_html(Request $request)
     {
-        return view('loginteste');
+        return view('login');
     }
 
     public function cadastrar_usuario(Request $request)

@@ -1,41 +1,57 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\HomeController;
-use App\Http\Middleware\LogadoWebMiddleware;
 use App\Http\Middleware\LogadoAdminMiddleware;
+use App\Http\Middleware\LogadoWebMiddleware;
+use App\Http\Middleware\AdminMiddleware;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FuncionarioController;
+use App\Http\Controllers\UsuarioController;
 
-Route::get('/loginteste', [LoginController::class, 'mostrarloginteste'] )->name('loginteste');
+Route::get('/loginteste', function () {
+    return view('loginteste');
+})->name('loginteste');
 
-Route::get('/agendamento', function () {
-    return view('agendamento');
-})->name('agendamento');
+Route::middleware([LogadoWebMiddleware::class])->group(function () {
 
-Route::get('/agendamento/novo', function () {
-    return view('novo_agendamento');
-})->name('agendamento.novo');
+    Route::get('/home', function (Request $request) {
+        return view('home', [
+            'usuario' => $request->input('usuario'),
+        ]);
+    })->name('home');
 
-Route::get('/agendamento/detalhe', function () {
-    return view('detalhe_agendamento');
-})->name('agendamento.detalhe');
+    Route::get('/agendamento', function () {
+        return view('agendamento');
+    })->name('agendamento');
 
-Route::get('/agendamento/devolucao', function () {
-    return view('devolucao');
-})->name('agendamento.devolucao');
+    Route::get('/equipamento', function () {
+        return view('equipamento');
+    })->name('equipamento');
 
-Route::get('/equipamento', function () {
-    return view('equipamento');
-})->name('equipamento');
+    Route::get('/novo_agendamento', function () {
+        return view('novo_agendamento');
+    })->name('novo_agendamento');
 
-Route::get('/equipamento/cadastro', function () {
-    return view('cadastro_equipamento');
-})->name('equipamento.cadastro');
+    Route::get('/detalhe_agendamento', function () {
+        return view('detalhe_agendamento');
+    })->name('detalhe_agendamento');
 
-Route::get('/equipamento/detalhe', function () {
-    return view('detalhe_equipamento');
-})->name('equipamento.detalhe');
+    Route::get('/devolucao', function () {
+        return view('devolucao');
+    })->name('devolucao');
 
-Route::get('/home', [HomeController::class, 'mostrarHome'])->middleware(LogadoWebMiddleware::class)->name('home');
-Route::get('/login',[LoginController::class, 'mostrarloginteste'])->name('login');
-Route::get('/painel',[LoginController::class, 'mostraradmin'])->middleware(LogadoAdminMiddleware::class)->name('admin');
+    Route::middleware([LogadoAdminMiddleware::class])->group(function () {
+
+        Route::get('/painel', function () {
+            return view('painel');
+        })->name('painel');
+
+        Route::get('/cadastro_equipamento', function () {
+            return view('cadastro_equipamento');
+        })->name('cadastro_equipamento');
+
+    });
+
+   Route::get('/funcionario_teste',[FuncionarioController::class, 'funcionario_teste'])->name('funcionario_teste');
+
+});
